@@ -356,6 +356,15 @@ class Api:
                   'since_id':since_id,"max_id":max_id}
         return self.__util(_SEARCH_TWEETS_URL,arg_dict)
      
+    #return collection of up to 100 user IDS belonging to users who have retweeted the tweet specified by the id parameter
+    #rate_limit = 15/user, 60/app
+    def get_retweeters_id(self,id,cursor=None,stringify_ids=None):
+        arg_dict={'id':id,'cursor':cursor,"stringify":stringify_ids}
+        return self.__util(_RETWEETS_IDS_URL,arg_dict)
+        
+    
+    
+
 
          
         
@@ -383,7 +392,7 @@ if __name__=="__main__":
     
     api = Api(consumer_key, consumer_secret,
               oauth_token, oauth_token_secret)
-
+    print api.get_retweets_of_me(327473909412814850)
     print api.get_user_timeline(count=2)
     print api.get_home_timeline(count=2)
     print api.get_retweets_of_me(count=1)
