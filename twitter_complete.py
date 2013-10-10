@@ -27,7 +27,13 @@ from pprint import pprint
 # Tiwtter Api URL
 
 _USER_TIMELINE_URL = 'https://api.twitter.com/1.1/statuses/user_timeline.json'
+_RETWEETS_OF_ME="https://api.twitter.com/1.1/statuses/retweets_of_me.json"
+_MENTION_TIMELINE_URL='https://api.twitter.com/1.1/statuses/mentions_timeline.json'
+_HOME_TIMELINE_URL = 'https://api.twitter.com/1.1/statuses/home_timeline.json'
+
 RATE_LIMIT_URL ='https://api.twitter.com/1.1/application/rate_limit_status.json'
+
+_SEARCH_TWEETS_URL = "https://api.twitter.com/1.1/search/tweets.json"
 
 # these constants are used in the GetOuath class.
 _REQUEST_TOKEN_URL = 'https://twitter.com/oauth/request_token'
@@ -230,11 +236,14 @@ class Api:
 
         self.client = oauth.Client(oauth.Consumer(consumer_key, consumer_secret),
                               oauth.Token(oauth_token, oauth_token_secret))
-
-     
-
-    def rate_limit(self):
-        url = RATE_LIMIT_URL
+      #accept list of resources
+    #application/rate_limit =180        
+    def rate_limit(self,resources=None):
+        if resources:
+            resources=",".join(resources)
+            url = RATE_LIMIT_URL + "?resources=" + resources 
+        else:    
+            url = RATE_LIMIT_URL #+ "?resources=account,application,search,statuses"
         print url
         res,content = self.client.request(url,'GET')
 
@@ -244,16 +253,12 @@ class Api:
             #parse rate limit json
             data = json.loads(content)
             print data
+
             
-        
-        
-    
-    def get_user_timeline(self, id=None, since_id=None, max_id=None,
-                             count=None, page=None):
-        
+    def __util(self,url=None,arg_dict=None):
+          
         # parse args
-        arg_dict = {'id':id , 'since_id':since_id, 'max_id':max_id,
-                    'count':count, 'page':page}
+        
 
         url_param_list = []
 
@@ -264,10 +269,8 @@ class Api:
         # create URL. append querry to a URL
         param = '&'.join(url_param_list)
         if param:
-            url = _USER_TIMELINE_URL + '?' + param
-        else:
-            url = _USER_TIMELINE_URL
-    
+            url = url + '?' + param
+        
         print url
         # GET request to Twitter
         res, content = self.client.request(url, 'GET')
@@ -280,18 +283,111 @@ class Api:
             #print content
             data = json.loads(content)
             
-            for d in data:
+            '''for d in data:
                 print "name: " + d['user']['name']
                 print "location: " + d['user']['location']
                 print "tweet id: " + str(d['id'])
-                print "tweet text: " + d['text']
-            #doc = minidom.parseString(content)
-            #return self.xml_parser.create_status_object_list(doc.getElementsByTagName('status'))
+                print "tweet text: " + d['text']'''
+
+            return data
+         
+
+
+
+
+
+    '''return 20 most recent tweets ,upto 800 and return tweet with mention of username
+    rate_limit = 15/user'''
+
+    def get_mentions_timeline(self, since_id=None, max_id=None,count=None, page=None):
+        arg_dict = { 'since_id':since_id, 'max_id':max_id,
+                    'count':count}
+        return self.__util(_MENTION_TIMELINE_URL,arg_dict)
+        
+         
+
+    #can return only upto  3200 of a user's most recent tweets
+    #rate_limit = 180/user
+    def get_user_timeline(self, user_id=None, since_id=None, max_id=None,
+                             count=None, page=None):
+
+       
+        # parse args
+        arg_dict = {'user_id':user_id , 'since_id':since_id, 'max_id':max_id,
+                    'count':count}
+        return self.__util(_USER_TIMELINE_URL,arg_dict)
+
+
+              
+    #can return upto 800,return tweet posted by user and followers
+    #rate_limit 15/user
+    def get_home_timeline(self, since_id=None, max_id=None,
+                             count=None):
+        
+        # parse args
+        arg_dict = { 'since_id':since_id, 'max_id':max_id,
+                    'count':count}
+        return self.__util(_HOME_TIMELINE_URL,arg_dict)
+       
+
+  
+    #return most recent tweets authoured by user that have been retweeted by others
+    #rate_limit = 15
+    def get_retweets_of_me(self,since_id=None,max_id=None,
+                           count=None):
+          arg_dict = {'since_id':since_id, 'max_id':max_id,
+                    'count':count}
+          return self.__util(_RETWEETS_OF_ME,arg_dict)
+
+
+
+    #now search
+    '''
+        rate limit =180/user
+
+        d=api.get_search('rohit',count=5)
+        for x in d['statuses']:
+        #print x['statuses']
+        print x['text']
+    '''
+    def get_search(self,q,geocode=None,lang=None,
+                   count=None,since_id=None,max_id=None):
+        arg_dict={'q':q,'geocode':geocode,'lang':lang,'count':count,
+                  'since_id':since_id,"max_id":max_id}
+        return self.__util(_SEARCH_TWEETS_URL,arg_dict)
+     
+
          
         
 
 
 
+'''
+if __name__=="__main__":
+    consumer_key=********
+    consumer_secret=******
+    get = GetOauth(consumer_key ,consumer_secret)
+    
+    get.get_oauth()
+      Request Token:
+        - oauth_token        = ***
+        - oauth_token_secret = ***
+      Go to the following link in your browser
+      http://twitter.com/oauth/authorize?oauth_token=***
+      
+      What is the PIN? ***
+      Access Token:
+        - oauth_token        = ***
+        - oauth_token_secret = ***
+   
+    
+    api = Api(consumer_key, consumer_secret,
+              oauth_token, oauth_token_secret)
 
+    print api.get_user_timeline(count=2)
+    print api.get_home_timeline(count=2)
+    print api.get_retweets_of_me(count=1)
+    print api.get_search('rahul',count=2)
+    print api.rate_limit(['search','application','statuses'])
 
-
+'''
