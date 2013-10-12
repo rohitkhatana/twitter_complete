@@ -26,10 +26,17 @@ import json
 from pprint import pprint
 # Tiwtter Api URL
 
+_USER_SEARCH_URL  = "https://api.twitter.com/1.1/users/search.json"
+_USER_LOOKUP_URL = 'https://api.twitter.com/1.1/users/lookup.json'
+
 _USER_TIMELINE_URL = 'https://api.twitter.com/1.1/statuses/user_timeline.json'
 _RETWEETS_OF_ME="https://api.twitter.com/1.1/statuses/retweets_of_me.json"
 _MENTION_TIMELINE_URL='https://api.twitter.com/1.1/statuses/mentions_timeline.json'
 _HOME_TIMELINE_URL = 'https://api.twitter.com/1.1/statuses/home_timeline.json'
+
+
+_RETWEETERS_IDS_URL = 'https://api.twitter.com/1.1/statuses/retweeters/ids.json'
+_RETWEETS_OF_ME="https://api.twitter.com/1.1/statuses/retweets_of_me.json"
 
 RATE_LIMIT_URL ='https://api.twitter.com/1.1/application/rate_limit_status.json'
 
@@ -341,6 +348,16 @@ class Api:
 
 
 
+
+    def get_user_search(self,q,page=None,count=None):
+        arg_dict = {'q':q,'page':page,'count':count}
+        return self.__util(_USER_SEARCH_URL,arg_dict)
+
+
+    def get_user_lookup(self,screen_name=None,user_id=None,include_entities=None):
+        arg_dict = {'screen_name':screen_name,'user_id':user_id,"include_entities":include_entities}
+        return self.__util(_USER_LOOKUP_URL,arg_dict)
+    
     #now search
     '''
         rate limit =180/user
