@@ -26,6 +26,9 @@ import json
 from pprint import pprint
 # Tiwtter Api URL
 
+_USER_FOLLOWERS_IDS_URL = 'https://api.twitter.com/1.1/followers/ids.json'
+_USER_FRIENDS_IDS_URL = 'https://api.twitter.com/1.1/friends/ids.json'
+
 _USER_SEARCH_URL  = "https://api.twitter.com/1.1/users/search.json"
 _USER_LOOKUP_URL = 'https://api.twitter.com/1.1/users/lookup.json'
 
@@ -261,17 +264,25 @@ class Api:
             data = json.loads(content)
             print data
 
-            
-    def __util(self,url=None,arg_dict=None):
+    def __util(self,url=None,arg_dict=None,METHOD=None):
           
         # parse args
-        
+        if METHOD==None:
+            METHOD = 'GET'
 
         url_param_list = []
 
         for (key, item) in arg_dict.iteritems():
             if item != None:
-                url_param_list.append(key + '=' + str(item))
+                if isinstance(item, list):
+                    lis=""
+                    for i in item:
+                        lis += str(i)
+                        if i!= item[(len(item)-1):][0]:
+                            lis += ','
+                    url_param_list.append(key + '=' + lis)
+                else:
+                    url_param_list.append(key + '=' + str(item))
 
         # create URL. append querry to a URL
         param = '&'.join(url_param_list)
@@ -280,7 +291,7 @@ class Api:
         
         print url
         # GET request to Twitter
-        res, content = self.client.request(url, 'GET')
+        res, content = self.client.request(url, METHOD)
 
 
         if res['status'] != '200':
@@ -296,7 +307,8 @@ class Api:
                 print "tweet id: " + str(d['id'])
                 print "tweet text: " + d['text']'''
 
-            return data
+            return data       
+   
          
 
 
@@ -347,16 +359,31 @@ class Api:
           return self.__util(_RETWEETS_OF_ME,arg_dict)
 
 
-
+    
+    '''
+        return first 1000 matching result of user account,try querying by topical interest
+        ,full name,company name,location etc
+        rate limit = 180/user
+    '''
 
     def get_user_search(self,q,page=None,count=None):
         arg_dict = {'q':q,'page':page,'count':count}
         return self.__util(_USER_SEARCH_URL,arg_dict)
 
+    
+    '''
+        return fully-hydrated user object for upto 100 user per request
+
+        this method is especially useful when used in cunjuction with collection
+        of user IDs returned from GET friends/ids and GET followers/ids
+
+        Get users/show is used to retrieve a single user object
+        rate limit 180/user,60/app
+    '''
 
     def get_user_lookup(self,screen_name=None,user_id=None,include_entities=None):
         arg_dict = {'screen_name':screen_name,'user_id':user_id,"include_entities":include_entities}
-        return self.__util(_USER_LOOKUP_URL,arg_dict)
+        return self.__util(_USER_LOOKUP_URL,arg_dict,METHOD="POST")
     
     #now search
     '''
@@ -372,7 +399,32 @@ class Api:
         arg_dict={'q':q,'geocode':geocode,'lang':lang,'count':count,
                   'since_id':since_id,"max_id":max_id}
         return self.__util(_SEARCH_TWEETS_URL,arg_dict)
-     
+
+
+    '''
+        return cursor of user_ids of those user whom the current user is following
+        rate limit 15/user,15/app
+        
+    '''
+    #return list of user_id
+    #list of user_id should be less then 101 otherwise 403 staus_code will return from twitter
+    def get_user_friends_ids(self,user_id=None,screen_name=None,cursor=None,stringify_ids=None,count=None):
+        arg_dict = {'user_id':user_id, 'screen_name':screen_name,'cursor':cursor,'stringify_ids':stringify_ids,'count':count}
+        data= self.__util(_USER_FRIENDS_IDS_URL,arg_dict)
+        return data['ids']
+
+
+    #return collection of userid who are following the specified user
+    #return 5000 userids and mulitple 'pages'o fo result
+    #rate limit 15/user,15/app
+    #this method return list of ids
+    def get_user_followers_ids(self,user_id=None,screen_name=None,cursor=None,stringify_ids=None,count=None):
+        arg_dict = {'user_id':user_id, 'screen_name':screen_name,'cursor':cursor,'stringify_ids':stringify_ids,'count':count}
+        data= self.__util(_USER_FOLLOWERS_IDS_URL,arg_dict)
+        return data['ids']
+    
+
+        
     #return collection of up to 100 user IDS belonging to users who have retweeted the tweet specified by the id parameter
     #rate_limit = 15/user, 60/app
     def get_retweeters_id(self,id,cursor=None,stringify_ids=None):
@@ -381,13 +433,8 @@ class Api:
         
     
     
-
-
-         
-        
-
-
-
+    
+    
 '''
 if __name__=="__main__":
     consumer_key=********
