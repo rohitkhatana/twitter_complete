@@ -25,7 +25,8 @@ import urlparse
 import json
 from pprint import pprint
 # Tiwtter Api URL
-
+_STATUS_UPDATE_URL = 'https://api.twitter.com/1.1/statuses/update.json'
+_SAVED_SEARCH_SHOW_URL='https://api.twitter.com/1.1/saved_searches/show/:id.json'
 _SAVED_SEARCH_LIST_URL = 'https://api.twitter.com/1.1/saved_searches/list.json'
 _USER_FOLLOWERS_IDS_URL = 'https://api.twitter.com/1.1/followers/ids.json'
 _USER_FRIENDS_IDS_URL = 'https://api.twitter.com/1.1/friends/ids.json'
@@ -440,10 +441,16 @@ class Api:
     '''
     def get_saved_search_list(self):
         return self.__util(_SAVED_SEARCH_LIST_URL,{})
-    
+
+    def get_saved_search_show_id(self,id):
+        arg_dict = {'id':id}
+        return self.__util(_SAVED_SEARCH_SHOW_URL,arg_dict)
 
 
-         
+    def status_update(self,status,in_reply_to_status_id=None,lat=None,source=None,place_id=None):
+        arg_dict = {'status':status,'in_reply_to_status_id':in_reply_to_status_id,
+                    'lat':lat,'place_id':place_id}        
+        return self.__util(_STATUS_UPDATE_URL,arg_dict,METHOD='POST')
         
 
 
