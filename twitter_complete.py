@@ -26,6 +26,7 @@ import json
 from pprint import pprint
 # Tiwtter Api URL
 
+_SAVED_SEARCH_LIST_URL = 'https://api.twitter.com/1.1/saved_searches/list.json'
 _USER_FOLLOWERS_IDS_URL = 'https://api.twitter.com/1.1/followers/ids.json'
 _USER_FRIENDS_IDS_URL = 'https://api.twitter.com/1.1/friends/ids.json'
 
@@ -431,8 +432,22 @@ class Api:
         arg_dict={'id':id,'cursor':cursor,"stringify":stringify_ids}
         return self.__util(_RETWEETS_IDS_URL,arg_dict)
         
+
+    '''
+        returns the authenticated user' saved search queries
+        reate limit = 15/user
+        
+    '''
+    def get_saved_search_list(self):
+        return self.__util(_SAVED_SEARCH_LIST_URL,{})
     
-    
+
+
+         
+        
+
+
+
     
     
 '''
