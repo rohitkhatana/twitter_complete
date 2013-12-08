@@ -184,7 +184,16 @@ class TwitterError(Exception):
         
 
 
+'''
+all data is return by this api is in unicode format
 
+so u need to convert it into ASCII
+so for this u need to to use
+import unicodedata
+for i in user_timeline:
+    print i['text'].encode('ascii','ignore')
+
+'''
 class Api:
     '''
     A Python interface to the Twitter API
@@ -329,12 +338,18 @@ class Api:
 
     #can return only upto  3200 of a user's most recent tweets
     #rate_limit = 180/user
-    def get_user_timeline(self, user_id=None, since_id=None, max_id=None,
+    '''
+        usage:
+        data=  api.get_user_timeline(screen_name='nike')
+        for i in data:
+            print i['text']
+    '''
+    def get_user_timeline(self, user_id=None, screen_name=None,since_id=None, max_id=None,
                              count=None, page=None):
 
        
         # parse args
-        arg_dict = {'user_id':user_id , 'since_id':since_id, 'max_id':max_id,
+        arg_dict = {'user_id':user_id , 'screen_name':screen_name,'since_id':since_id, 'max_id':max_id,
                     'count':count}
         return self.__util(_USER_TIMELINE_URL,arg_dict)
 
@@ -456,6 +471,12 @@ class Api:
 
 
     
+
+if __name__ == "__main__":
+    consumer_secret= 'hHWxrOaZ3e1P9q44q6t0tNLvHZXucKETg2CGuchsmRc'
+    consumer_key= 'kgIpenTTZcD7wD9dnOOxPQ'
+    get = GetOauth(consumer_key ,consumer_secret)
+    get.get_oauth()
     
 '''
 if __name__=="__main__":
