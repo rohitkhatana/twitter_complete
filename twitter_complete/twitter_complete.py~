@@ -344,7 +344,7 @@ class Api:
         for i in data:
             print i['text']
     '''
-    def get_user_timeline(self, user_id=None, screen_name=None,since_id=None, max_id=None,
+    def get_user_timeline(self, user_id=None, screen_name=None, since_id=None, max_id=None,
                              count=None, page=None):
 
        
