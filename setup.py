@@ -3,7 +3,7 @@ from distutils.core import setup
 setup(
 	name = 'twitter_complete',
 	packages = ['twitter_complete'],
-	version = '1.0',
+	version = '1.1',
 	description='Python based interface to the 1.1, aimed for beginners who just want to fetch data from twitter ',
 	author='rohit khatana',
 	author_email='rohitkhatana.khatana@gmail.com',
